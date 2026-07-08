@@ -10,4 +10,5 @@ test("Successful registration", async ({ page }) => {
   const email = `test${Date.now()}@test.com`;
   await page.locator('[data-qa="signup-email"]').fill(email);
   await page.getByRole("button", { name: "Signup" }).click();
+  await expect(page.getByText("Enter account information")).toBeVisible();
 });
