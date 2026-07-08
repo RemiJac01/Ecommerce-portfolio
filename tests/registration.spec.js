@@ -11,4 +11,6 @@ test("Successful registration", async ({ page }) => {
   await page.locator('[data-qa="signup-email"]').fill(email);
   await page.getByRole("button", { name: "Signup" }).click();
   await expect(page.getByText("Enter account information")).toBeVisible();
+  await page.locator('[value="Mr"]').click();
+  await page.locator('[data-qa="password"]').fill("secretpassword");
 });
