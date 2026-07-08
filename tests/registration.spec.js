@@ -7,6 +7,7 @@ test("Successful registration", async ({ page }) => {
     await consentButton.click();
   }
   await page.getByPlaceholder("Name").fill("nametest");
-  await page.locator('[data-qa="signup-email"]').fill("emailtest@test.com");
+  const email = `test${Date.now()}@test.com`;
+  await page.locator('[data-qa="signup-email"]').fill(email);
   await page.getByRole("button", { name: "Signup" }).click();
 });
