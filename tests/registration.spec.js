@@ -7,7 +7,7 @@ test("Successful registration", async ({ page }) => {
     await consentButton.click();
   }
   await page.getByPlaceholder("Name").fill("nametest");
-  const email = `test${Date.now()}@test.com`;
+  const email = `test${Date.now()}@test.com`; // Date.now() generates a unique timestamp so every test run uses a different email, preventing duplicate registration failures
   await page.locator('[data-qa="signup-email"]').fill(email);
   await page.getByRole("button", { name: "Signup" }).click();
   await expect(page.getByText("Enter account information")).toBeVisible();
