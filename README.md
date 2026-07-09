@@ -11,12 +11,13 @@ This project demonstrates:
 - Dynamic test data generation to avoid duplicate registration failures
 - Conditional logic to handle environment differences between local and CI (Continuous Integration)
 - Cross-browser testing across Chromium, Firefox, and Safari
+- Use of `data-qa` attributes for stable, test-specific locators
 
 ## Tests
 
 ### registration.spec.js
 
-- Successful user registration happy path
+- Successful user registration — covers consent popup handling, dynamic email generation, full account information form including radio buttons, dropdowns, and text fields, with URL and text assertions on completion
 
 ## Setup
 
