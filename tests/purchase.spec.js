@@ -6,4 +6,5 @@ test("Product purchase journey", async ({ loggedInPage }) => {
   await loggedInPage.getByRole("link", { name: "View Cart" }).click();
   await loggedInPage.locator("a.check_out").click();
   await loggedInPage.getByRole("link", { name: "Place Order" }).click();
+  await loggedInPage.locator("[]");
 });
