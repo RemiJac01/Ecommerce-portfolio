@@ -12,12 +12,17 @@ This project demonstrates:
 - Conditional logic to handle environment differences between local and CI (Continuous Integration)
 - Cross-browser testing across Chromium, Firefox, and Safari
 - Use of `data-qa` attributes for stable, test-specific locators
+- Fixture-based authentication for reusable logged-in state across tests
 
 ## Tests
 
 ### registration.spec.js
 
 - Successful user registration — covers consent popup handling, dynamic email generation, full account information form including radio buttons, dropdowns, and text fields, with URL and text assertions on completion
+
+### purchase.spec.js
+
+- Complete purchase journey — logs in via fixture, adds product to cart, navigates through checkout and payment forms, with URL and confirmation text assertions on completion
 
 ## Setup
 
