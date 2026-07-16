@@ -1,4 +1,5 @@
 import { test as base } from "@playwright/test";
+import { LoginPage } from "../pages/LoginPage.js";
 
 export const test = base.extend({
   loggedInPage: async ({ page }, use) => {
@@ -7,9 +8,8 @@ export const test = base.extend({
     if (await consentButton.isVisible()) {
       await consentButton.click();
     }
-    await page.locator('[data-qa="login-email"]').fill("PWtest@PW.com");
-    await page.locator('[data-qa="login-password"]').fill("PW123");
-    await page.getByRole("button", { name: "Login" }).click();
+    const loginPage = new LoginPage(page);
+    await loginPage.login("PWtest@PW.com", "PW123");
     await use(page);
   },
 });
