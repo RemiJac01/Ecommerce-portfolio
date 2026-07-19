@@ -13,6 +13,8 @@ This project demonstrates:
 - Cross-browser testing across Chromium, Firefox, and Safari
 - Use of `data-qa` attributes for stable, test-specific locators
 - Fixture-based authentication for reusable logged-in state across tests
+- Page Object Model (POM) for maintainable, centralised locators
+- Data-driven testing using arrays and loops
 
 ## Tests
 
@@ -23,6 +25,11 @@ This project demonstrates:
 ### purchase.spec.js
 
 - Complete purchase journey — logs in via fixture, adds product to cart, navigates through checkout and payment forms, with URL and confirmation text assertions on completion
+
+### login.spec.js
+
+- Successful login using the LoginPage POM (Page Object Model), with URL and text assertions
+- Data-driven negative login tests — a `for` loop generates tests from an array of invalid credential scenarios (wrong email, wrong password), each asserting the correct error message
 
 ## Setup
 
