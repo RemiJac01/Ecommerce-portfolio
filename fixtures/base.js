@@ -8,8 +8,9 @@ export const test = base.extend({
     if (await consentButton.isVisible()) {
       await consentButton.click();
     }
-    const loginPage = new LoginPage(page);
-    await loginPage.login("PWtest@PW.com", "PW123");
+    const loginActions = new LoginPage(page);
+    await loginActions.login("PWtest@PW.com", "PW123");
+    // Required Playwright syntax — this is where the fixture pauses and lets the test run.
     await use(page);
   },
 });

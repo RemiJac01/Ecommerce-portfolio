@@ -23,8 +23,8 @@ for (const arrayData of invalidLogins) {
     if (await consentButton.isVisible()) {
       await consentButton.click();
     }
-    const signInPage = new LoginPage(page);
-    await signInPage.login(arrayData.username, arrayData.password);
+    const loginActions = new LoginPage(page);
+    await loginActions.login(arrayData.username, arrayData.password);
     await expect(page.getByText(arrayData.error)).toBeVisible();
   });
 }
@@ -35,8 +35,8 @@ test("Login", async ({ page }) => {
   if (await consentButton.isVisible()) {
     await consentButton.click();
   }
-  const signInPage = new LoginPage(page);
-  await signInPage.login("PWtest@PW.com", "PW123");
+  const loginActions = new LoginPage(page);
+  await loginActions.login("PWtest@PW.com", "PW123");
   await expect(page).toHaveURL("https://automationexercise.com/");
   await expect(
     page
