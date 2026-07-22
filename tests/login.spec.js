@@ -1,5 +1,6 @@
 import { test, expect } from "../fixtures/base.js";
 import { LoginPage } from "../pages/LoginPage.js";
+import { dismissConsent } from "../utils/dismissConsent.js";
 
 const invalidLogins = [
   {
@@ -19,10 +20,7 @@ for (const arrayData of invalidLogins) {
     page,
   }) => {
     await page.goto("https://automationexercise.com/login");
-    const consentButton = page.getByRole("button", { name: "Consent" });
-    if (await consentButton.isVisible()) {
-      await consentButton.click();
-    }
+    await dismissConsent(page);
     const loginActions = new LoginPage(page);
     await loginActions.login(arrayData.username, arrayData.password);
     await expect(page.getByText(arrayData.error)).toBeVisible();
@@ -31,10 +29,7 @@ for (const arrayData of invalidLogins) {
 
 test("Login", async ({ page }) => {
   await page.goto("https://automationexercise.com/login");
-  const consentButton = page.getByRole("button", { name: "Consent" });
-  if (await consentButton.isVisible()) {
-    await consentButton.click();
-  }
+  await dismissConsent(page);
   const loginActions = new LoginPage(page);
   await loginActions.login("PWtest@PW.com", "PW123");
   await expect(page).toHaveURL("https://automationexercise.com/");

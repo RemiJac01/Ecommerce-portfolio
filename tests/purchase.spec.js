@@ -1,7 +1,9 @@
 import { test, expect } from "../fixtures/base.js";
+import { dismissConsent } from "../utils/dismissConsent.js";
 
 test("Product purchase journey", async ({ loggedInPage }) => {
   await loggedInPage.goto("https://automationexercise.com/products");
+  await dismissConsent(loggedInPage);
   await loggedInPage.locator('[data-product-id="1"]').first().click();
   await loggedInPage.getByRole("link", { name: "View Cart" }).click();
   await loggedInPage.locator("a.check_out").click();
