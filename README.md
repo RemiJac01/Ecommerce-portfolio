@@ -15,6 +15,7 @@ This project demonstrates:
 - Fixture-based authentication for reusable logged-in state across tests
 - Page Object Model (POM) for maintainable, centralised locators
 - Data-driven testing using arrays and loops
+- Reusable utility functions to avoid repeating common setup logic
 
 ## Tests
 
@@ -30,6 +31,13 @@ This project demonstrates:
 
 - Successful login using the LoginPage POM (Page Object Model), with URL and text assertions
 - Data-driven negative login tests — a `for` loop generates tests from an array of invalid credential scenarios (wrong email, wrong password), each asserting the correct error message
+
+## Structure
+
+- `pages/` — Page Object Models (LoginPage)
+- `fixtures/` — Custom test fixtures (loggedInPage)
+- `utils/` — Reusable helper functions (dismissConsent)
+- `tests/` — Spec files
 
 ## Setup
 
