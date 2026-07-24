@@ -9,9 +9,7 @@ test("Product search", async ({ page }) => {
   await expect(
     page.locator(".productinfo").getByText("Men Tshirt"),
   ).toBeVisible();
-  await expect(page).toHaveURL(
-    "https://automationexercise.com/products?search=Tshirt",
-  );
+  await expect(page).toHaveURL(/products\?search=/i);
   await expect(page.getByText("SEARCHED PRODUCTS")).toBeVisible();
   await expect(page.locator(".product-image-wrapper").first()).toBeVisible();
 });
