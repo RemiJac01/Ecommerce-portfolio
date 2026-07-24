@@ -16,6 +16,7 @@ This project demonstrates:
 - Page Object Model (POM) for maintainable, centralised locators
 - Data-driven testing using arrays and loops
 - Reusable utility functions to avoid repeating common setup logic
+- Regex assertions for resilient URL matching
 
 ## Tests
 
@@ -31,6 +32,10 @@ This project demonstrates:
 
 - Successful login using the LoginPage POM (Page Object Model), with URL and text assertions
 - Data-driven negative login tests — a `for` loop generates tests from an array of invalid credential scenarios (wrong email, wrong password), each asserting the correct error message
+
+### search.spec.js
+
+- Product search — searches for a term, asserts the results heading changes, the URL updates with the search parameter, and that relevant products are returned
 
 ## Structure
 
