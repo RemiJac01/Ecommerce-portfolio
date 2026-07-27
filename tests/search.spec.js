@@ -11,5 +11,9 @@ test("Product search", async ({ page }) => {
   ).toBeVisible();
   await expect(page).toHaveURL(/products\?search=/i);
   await expect(page.getByText("SEARCHED PRODUCTS")).toBeVisible();
-  await expect(page.locator(".product-image-wrapper").first()).toBeVisible();
+  await expect(
+    page
+      .locator("#contact-page")
+      .getByText("Success! Your details have been submitted successfully."),
+  ).toBeVisible();
 });
