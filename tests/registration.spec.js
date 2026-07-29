@@ -1,11 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { dismissConsent } from "../utils/dismissConsent.js";
 
 test("Successful registration", async ({ page }) => {
   await page.goto("https://automationexercise.com/login");
-  const consentButton = page.getByRole("button", { name: "Consent" });
-  if (await consentButton.isVisible()) {
-    await consentButton.click();
-  }
+  await dismissConsent(page);
   await page.getByPlaceholder("Name").fill("nametest");
   const email = `test${Date.now()}@test.com`; // Date.now() generates a unique timestamp so every test run uses a different email, preventing duplicate registration failures
   await page.locator('[data-qa="signup-email"]').fill(email);
@@ -24,6 +22,7 @@ test("Successful registration", async ({ page }) => {
   await page.locator('[data-qa="city"]').fill("Sydney");
   await page.locator('[data-qa="zipcode"]').fill("2000");
   await page.locator('[data-qa="mobile_number"]').fill("07949532458");
+  await dismissConsent(page);
   await page.getByRole("button", { name: "Create Account" }).click();
   await expect(page).toHaveURL(
     "https://automationexercise.com/account_created",
