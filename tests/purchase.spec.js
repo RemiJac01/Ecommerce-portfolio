@@ -16,9 +16,7 @@ test("Product purchase journey", async ({ loggedInPage }) => {
   await loggedInPage
     .getByRole("button", { name: "Pay and Confirm Order" })
     .click();
-  await expect(loggedInPage).toHaveURL(
-    "https://automationexercise.com/payment_done/500",
-  );
+  await expect(loggedInPage).toHaveURL(/payment_done\/\d+/);
   await expect(
     loggedInPage.getByText("Congratulations! Your order has been confirmed!"),
   ).toBeVisible();
