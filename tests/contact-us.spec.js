@@ -11,11 +11,28 @@ test("Contact us page", async ({ page }) => {
   await page
     .locator('[name="upload_file"]')
     .setInputFiles("test_fixtures/Test_data_1.rtf");
-  page.on("dialog", (dialog) => dialog.accept()); //dismisses browser dialog pop up
+  page.on("dialog", (dialog) => dialog.accept()); //Accepts the dialog pop up
   await page.getByRole("button", { name: "Submit" }).click();
   await expect(
     page
       .locator("#contact-page")
       .getByText("Success! Your details have been submitted successfully."),
   ).toBeVisible();
+});
+
+test("Empty email field", async ({ page }) => {
+  await page.goto("https://automationexercise.com/contact_us");
+  await dismissConsent(page);
+  await page.locator('[data-qa="name"]').fill("Neg test 1");
+  await page.locator('[data-qa="subject"]').fill("negative email test");
+  await page
+    .locator('[data-qa="message"]')
+    .fill("This will test a neg scenario");
+  page.on("dialog", (dialog) => dialog.accept()); //Accepts the dialog pop up
+  await page.getByRole("button", { name: "Submit" }).click();
+  await expect(
+    page
+      .locator("#contact-page")
+      .getByText("Success! Your details have been submitted successfully."),
+  ).not.toBeVisible();
 });
