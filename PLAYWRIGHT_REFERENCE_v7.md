@@ -1,4 +1,4 @@
-# Playwright Reference Guide (v6)
+# Playwright Reference Guide (v7)
 
 A plain-English reference for everything you learn as you go.
 
@@ -80,6 +80,9 @@ A plain-English reference for everything you learn as you go.
 
 **Terms / glossary**
 - [Glossary](#glossary)
+
+**AI testing awareness**
+- [AI testing terms (for interview awareness)](#ai-testing-terms-for-interview-awareness)
 
 ---
 
@@ -1044,6 +1047,52 @@ Something (usually a popup/overlay) is covering the element you're trying to cli
 | **CI** | Continuous Integration — automatic test runs on every push. |
 | **API** | Application Programming Interface — lets you test data/logic without a browser. |
 | **YAGNI** | "You Aren't Gonna Need It" — don't build structure before it's needed. |
+
+---
+
+## AI testing terms (for interview awareness)
+
+These are terms for testing **AI-powered applications** (apps built on LLMs) — a newer, *separate* QA specialism from the UI/API automation in the rest of this guide. Here the thing being tested is an AI model that produces unpredictable output.
+
+**You don't need to do any of this yet.** This section is purely so you recognise the terms if an interviewer uses them, and can say "I know what that means and why it matters, though I haven't worked with it hands-on." Every role that does this work is built on the automation fundamentals this guide covers.
+
+### The pipeline being tested
+
+**Prompt → Retrieval → Model → Tools → Memory → Response**
+
+Each stage is a place something can go wrong, and each is a thing QA might need to check.
+
+### The terms
+
+| Term | One-line meaning | The question it answers |
+|------|------------------|-------------------------|
+| **Prompt testing** | Checking the app handles varied inputs and edge cases | Does it cope with unusual, empty, or awkward prompts? |
+| **Hallucination testing** | Checking the AI doesn't invent false or unsupported information | Is the output actually true, or confidently made up? |
+| **RAG evaluation** | Checking a Retrieval-Augmented Generation system pulls the right documents and grounds its answer in them | Did it retrieve the correct source, and is the answer based on it? |
+| **Guardrail testing** | Checking the system blocks unsafe or policy-violating responses | Can it refuse to produce harmful or off-limits content? |
+| **Prompt injection testing** | Checking the system resists malicious instructions hidden in input | Can an attacker trick it into ignoring its rules? |
+| **Tool & agent testing** | Checking an AI that uses tools picks the right tool, with the right parameters, and recovers from failures | Right tool, right inputs, graceful recovery? |
+| **Consistency testing** | Checking responses are reliable across repeated runs | Ask the same thing twice — do you get dependable answers? |
+| **AI observability** | Being able to trace prompts, responses, retrieval, tool calls, latency, and failures | Can we see what happened inside the pipeline when something goes wrong? |
+
+### RAG — worth knowing slightly more
+
+**RAG = Retrieval-Augmented Generation.** An AI app, before answering, first *retrieves* relevant documents (from a database or knowledge base) and feeds them to the model so the answer is grounded in real source material rather than the model's memory. Testing it means checking two things: did it retrieve the *right* documents, and did the answer actually *use* them?
+
+### The mindset shift (the genuinely useful bit)
+
+Old QA question: *"Can I automate this test case?"*
+Modern question: *"Can I engineer a reliable quality system for this application?"*
+
+That shift isn't AI-specific — it's the same move from "writing individual tests" to "building a maintainable framework" already made with POM, fixtures, utilities, and CI.
+
+### Career evolution (context, not pressure)
+
+**QA Engineer → Automation Engineer → SDET → AI Test Engineer → AI/Agentic SDET**
+
+You walk this path; you don't leap to the end. The AI-specific skills make far more sense once the fundamentals are solid.
+
+> "AI will not eliminate testing. It will change what we need to test." The fundamentals don't become obsolete — they become the baseline the AI-specific layer is added on top of.
 
 ---
 
