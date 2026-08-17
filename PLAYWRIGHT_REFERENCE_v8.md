@@ -1,4 +1,4 @@
-# Playwright Reference Guide (v7)
+# Playwright Reference Guide (v8)
 
 A plain-English reference for everything you learn as you go.
 
@@ -77,6 +77,12 @@ A plain-English reference for everything you learn as you go.
 - [CI — Continuous Integration](#ci-continuous-integration)
 - [Errors you will see](#errors-you-will-see)
 - [Common mistakes](#common-mistakes-to-watch-out-for)
+
+**Codegen**
+- [Codegen — the recorder, and its limits](#codegen--the-recorder-and-its-limits)
+
+**Using AI in your workflow**
+- [Using AI with Playwright (the five uses)](#using-ai-with-playwright-the-five-uses)
 
 **Terms / glossary**
 - [Glossary](#glossary)
@@ -1014,6 +1020,63 @@ Something (usually a popup/overlay) is covering the element you're trying to cli
 - Registering a dialog handler AFTER the click that triggers it — must be before
 - Trusting a passing test that has no assertion — clicking isn't verifying
 - CSS `text-transform: uppercase` — the on-screen CAPS may differ from the real HTML text; assert the real text
+
+---
+
+## Codegen — the recorder, and its limits
+
+`npx playwright codegen https://...` opens Playwright's **recorder**: a browser plus an Inspector window that writes test code automatically as you click and type on a real site.
+
+### What it's genuinely good for
+
+- **Discovering locators fast.** Its best use isn't writing whole tests — it's finding *how to target a tricky element*. Click the thing, see the locator it suggests, take just that.
+- **Exploring an unfamiliar app.** Clicking through with codegen running gives a fast rough map of selectors and flows on a codebase you don't know yet.
+
+### What it does NOT do well (the important part)
+
+- **It writes actions, not assertions.** Codegen records clicks, fills, and navigation — but almost never writes a single assertion. A test with no assertion isn't a test; it's a script that clicks things. The verification — the actual point — is entirely on you.
+- **It records one run as if it's the only possible run.** If a consent popup or ad appeared once while recording, it writes an *unconditional* click for it. On a run where that popup doesn't appear, that line times out and fails. It has no concept of "this only sometimes shows."
+- **It captures throwaway interactions.** It'll happily record you closing an ad (often inside a fragile iframe with an unstable name) — steps that won't reliably repeat.
+- **Its locators aren't always the most stable.** It may pick a role+name locator when a unique `id` or `data-qa` was available.
+
+### The honest professional position
+
+Codegen is a **locator-discovery and exploration tool, not a test-authoring tool.** Experienced engineers mine it for a selector or scout a page, then write the actual test themselves — controlling structure, locators, and assertions. For anyone who can already write tests well, cleaning up codegen's output is often *more* work than writing the test clean.
+
+**Interview-ready take:** *"I've used codegen, but I don't lean on it for writing tests. It records actions but not assertions, captures one-off popups that won't reliably reappear, and doesn't always pick the most stable locators. I find it more useful for quickly discovering a locator or exploring an unfamiliar page — then I write the test myself so I control the structure and the assertions."*
+
+---
+
+## Using AI with Playwright (the five uses)
+
+AI (ChatGPT, Claude, Gemini, Copilot, etc.) is a genuine part of a modern QA workflow — but as a **tool you judge, not a source you trust.** The governing rule throughout: **AI drafts, you judge.** Its usefulness on any task is roughly inverse to how well you already understand that task — most valuable where you're weak or unfamiliar, actively harmful where it robs you of a rep you should be doing yourself.
+
+The single biggest risk: **AI writes confident nonsense in exactly the same tone as good advice.** Nothing in *how* a suggestion is phrased tells you whether it's right. The only defence is knowing enough to tell them apart — which is why AI-assisted work comes *after* building the fundamentals, not before.
+
+### 1. Reviewing your code
+
+Ask AI to review a test you wrote. It'll surface real improvements — but mixed in with YAGNI-violations and occasionally genuinely bad advice (e.g. suggesting a manual `waitForLoadState()` after an action, which Playwright's auto-waiting makes redundant and which encourages flaky habits). Sort its feedback into *useful / valid-but-low-priority / wrong*. Action the useful, bin the rest.
+
+### 2. Explaining failures
+
+AI can decode an unfamiliar error fast. But if you can already read the error yourself, do it — every error you decode unaided makes you faster at the next. Reach for AI on failures only when you're genuinely stuck after a real attempt, or when the error type is new to you. Healthiest pattern: interpret first, then use AI to *confirm* your read, not replace it.
+
+### 3. Codegen
+
+See the [Codegen section](#codegen--the-recorder-and-its-limits) above. It drafts actions; you supply the judgement, the locators, and the assertions.
+
+### 4. Generating test ideas / edge cases
+
+AI's strongest, safest use. It's excellent at **breadth** — it'll surface whole categories you'd miss (for a functional/reliability-minded tester, it reliably adds the *security/adversarial* cases: SQL injection, XSS, malicious file uploads). But it can't **prioritise** for your specific app — it gives thorough over relevant, padding lists with low-value noise (JS-disabled, right-to-left text). **Draft broad, judge narrow.** Use it specifically to cover your own known blind spots.
+
+### 5. Scaffolding whole tests (prompt engineering)
+
+The highest-leverage and highest-risk use. Two halves:
+
+- **Writing the prompt.** Quality out = quality in. A good prompt gives: the real URL, the real locators/`data-qa` you found by inspecting, the exact expected behaviour to assert, and *your standards* ("conditional consent, use `data-qa`, must include assertions, fit my existing framework — don't build a new one"). Vague asks get generic, often-wrong output. And beware asking for the *wrong thing confidently* — e.g. saying "BDD" when you don't mean Cucumber, or "build a framework" when you have one — AI will faithfully give you exactly what you asked for, wrong or not.
+- **Judging the output.** Everything you'd catch in a review, in one artefact: missing `.first()` on a strict-mode locator, inline consent instead of your utility, assertions that check *visible* but not *works*, hallucinated methods.
+
+**The crossover realisation:** once a prompt is specific enough to produce good output, you've often done enough of the thinking to just write the test yourself. AI scaffolding earns its place on *long* or *unfamiliar* work — less so on a short test you already understand.
 
 ---
 
