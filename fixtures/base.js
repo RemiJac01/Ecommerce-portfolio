@@ -7,7 +7,7 @@ import { dismissConsent } from "../utils/dismissConsent.js";
 
 export const test = base.extend({
   loggedInPage: async ({ page }, use) => {
-    await page.goto("https://automationexercise.com/login");
+    await page.goto("/login");
     await dismissConsent(page);
 
     const loginActions = new LoginPage(page);

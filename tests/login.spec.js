@@ -19,7 +19,7 @@ for (const arrayData of invalidLogins) {
   test(`Incorrect UN & PW tests for ${arrayData.username}`, async ({
     page,
   }) => {
-    await page.goto("https://automationexercise.com/login");
+    await page.goto("/login");
     await dismissConsent(page);
     const loginActions = new LoginPage(page);
     await loginActions.login(arrayData.username, arrayData.password);

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { dismissConsent } from "../utils/dismissConsent.js";
 
 test("Successful registration", async ({ page }) => {
-  await page.goto("https://automationexercise.com/login");
+  await page.goto("/login");
   await dismissConsent(page);
   await page.getByPlaceholder("Name").fill("nametest");
   const email = `test${Date.now()}@test.com`; // Date.now() generates a unique timestamp so every test run uses a different email, preventing duplicate registration failures
@@ -24,8 +24,6 @@ test("Successful registration", async ({ page }) => {
   await page.locator('[data-qa="mobile_number"]').fill("07949532458");
   await dismissConsent(page);
   await page.getByRole("button", { name: "Create Account" }).click();
-  await expect(page).toHaveURL(
-    "https://automationexercise.com/account_created",
-  );
+  await expect(page).toHaveURL(/account_created/);
   await expect(page.getByText("Account Created!")).toBeVisible();
 });

@@ -4,7 +4,7 @@ import { PaymentPage } from "../pages/PaymentPage.js";
 
 test("Product purchase journey", async ({ loggedInPage }) => {
   const paymentActions = new PaymentPage(loggedInPage);
-  await loggedInPage.goto("https://automationexercise.com/products");
+  await loggedInPage.goto("/products");
   await dismissConsent(loggedInPage);
   await loggedInPage.locator('[data-product-id="1"]').first().click();
   await loggedInPage.getByRole("link", { name: "View Cart" }).click();
