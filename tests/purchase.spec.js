@@ -1,8 +1,12 @@
 import { test, expect } from "../fixtures/base.js";
 import { dismissConsent } from "../utils/dismissConsent.js";
 import { PaymentPage } from "../pages/PaymentPage.js";
+import { clearCart } from "../utils/clearCart.js";
 
 test("Product purchase journey", async ({ loggedInPage }) => {
+  await loggedInPage.goto("/view_cart");
+  await dismissConsent(loggedInPage);
+  await clearCart(loggedInPage);
   const paymentActions = new PaymentPage(loggedInPage);
   await loggedInPage.goto("/products");
   await dismissConsent(loggedInPage);
