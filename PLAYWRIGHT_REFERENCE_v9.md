@@ -1,4 +1,4 @@
-# Playwright Reference Guide (v8)
+# Playwright Reference Guide (v9)
 
 A plain-English reference for everything you learn as you go.
 
@@ -18,6 +18,7 @@ A plain-English reference for everything you learn as you go.
 
 **Finding elements**
 - [The seven built-in locators](#the-seven-built-in-locators)
+- [Locator priority order — which to pick when inspecting](#locator-priority-order--which-to-pick-when-inspecting)
 - [getByRole()](#getbyrole)
 - [getByText()](#getbytext)
 - [getByLabel()](#getbylabel)
@@ -263,6 +264,28 @@ Playwright has seven built-in locators, designed to find elements the way a user
 | `getByTestId()` | the test-id attribute (default `data-testid`) | `getByTestId('signup-email')` |
 
 When none of these fit, fall back to `page.locator()` with a CSS selector. Full docs: [playwright.dev/docs/locators](https://playwright.dev/docs/locators) and [playwright.dev/docs/api/class-locator](https://playwright.dev/docs/api/class-locator).
+
+---
+
+### Locator priority order — which to pick when inspecting
+
+When you inspect an element, don't agonise over "which locator is right?" Walk down this list and **take the first good one available.** It turns a nervy judgement call into a mechanical lookup.
+
+| Priority | Locator | Why | Example |
+|----------|---------|-----|---------|
+| 1 | `data-qa` / `data-testid` | Built *for* testing. Never changes for cosmetic reasons. If present, use it and stop. | `locator('[data-qa="login-email"]')` |
+| 2 | `id` | Stable and unique. | `locator('#subscribe')` |
+| 3 | Role + accessible name | Matches how users and screen readers see the page. | `getByRole('button', { name: 'Login' })` |
+| 4 | `name` attribute | For form fields with no data-qa or id. | `locator('[name="upload_file"]')` |
+| 5 | A **meaningful** class | Fine *if* the class describes function, not looks. | `locator('a.check_out')` |
+| 6 | Decorative / styling classes | **Avoid.** These change when the design changes. | `.fa-arrow-circle-o-right`, `.col-sm-3` |
+
+**Two things that kill the nerves:**
+
+- **Most of the time the choice is made for you.** There's a `data-qa` or an `id` → take it, no deliberation.
+- **A wrong locator fails loudly and instantly** (strict-mode violation, or "not found"), never silently. So when it's genuinely ambiguous at rungs 5-6, just pick a reasonable one and run it — the test confirms or rejects it in seconds. Inspecting is a quick lookup with a fallback, not a high-wire act.
+
+**Why decorative classes are a trap:** `fa-*` classes are Font Awesome *icon* classes — they describe what an icon looks like (an arrow, a trash can), not what the element does. If the site swaps the icon, the class changes and your locator breaks even though the element's function didn't. Same for layout classes like `col-sm-3`. Locate by what a thing *is*, not how it *looks*.
 
 ---
 
