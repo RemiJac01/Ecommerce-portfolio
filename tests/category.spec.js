@@ -10,7 +10,10 @@ for (const item of categories) {
     await page.goto("/products");
     await dismissConsent(page);
     await page.getByRole("link", { name: item.parent }).click();
-    await page.getByRole("link", { name: item.child }).click();
+    await page
+      .locator(`#${item.parent}`)
+      .getByRole("link", { name: item.child })
+      .click();
     await expect(page.getByText(new RegExp(item.heading, "i"))).toBeVisible();
   });
 }
