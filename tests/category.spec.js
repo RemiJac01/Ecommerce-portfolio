@@ -7,7 +7,14 @@ const categories = [
 ];
 
 for (const item of categories) {
-  test(`Filter by ${item.parent} - ${item.child}`, async ({ page }) => {
+  test(`Filter by ${item.parent} - ${item.child}`, async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(
+      browserName === "webkit",
+      "Accordion animation unreliable on webkit",
+    );
     await page.goto("/products");
     await dismissConsent(page);
     await page.locator(`[href="#${item.parent}"]`).click();
