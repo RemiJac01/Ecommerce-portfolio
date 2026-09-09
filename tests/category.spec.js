@@ -3,6 +3,7 @@ import { dismissConsent } from "../utils/dismissConsent.js";
 
 const categories = [
   { parent: "Women", child: "Dress", heading: "WOMEN - DRESS PRODUCTS" },
+  { parent: "Men", child: "Tshirts", heading: "MEN - TSHIRTS PRODUCTS" },
 ];
 
 for (const item of categories) {
