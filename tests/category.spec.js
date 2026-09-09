@@ -11,6 +11,7 @@ for (const item of categories) {
     await page.goto("/products");
     await dismissConsent(page);
     await page.locator(`[href="#${item.parent}"]`).click();
+    await page.locator(`#${item.parent}`).waitFor({ state: "visible" });
     await page
       .locator(`#${item.parent}`)
       .getByRole("link", { name: item.child, exact: true })
