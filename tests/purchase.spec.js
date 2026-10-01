@@ -2,8 +2,10 @@ import { test, expect } from "../fixtures/base.js";
 import { dismissConsent } from "../utils/dismissConsent.js";
 import { PaymentPage } from "../pages/PaymentPage.js";
 import { clearCart } from "../utils/clearCart.js";
+import { blockAds } from "../utils/blockAds.js";
 
 test("Product purchase journey", async ({ loggedInPage }) => {
+  await blockAds(loggedInPage);
   await loggedInPage.goto("/view_cart");
   await dismissConsent(loggedInPage);
   await clearCart(loggedInPage);

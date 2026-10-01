@@ -1,8 +1,10 @@
 import { test, expect } from "../fixtures/base.js";
 import { clearCart } from "../utils/clearCart.js";
 import { dismissConsent } from "../utils/dismissConsent.js";
+import { blockAds } from "../utils/blockAds.js";
 
 test("cart quantity and price test", async ({ page }) => {
+  await blockAds(page);
   await page.goto("/products");
   await dismissConsent(page);
   await clearCart(page);

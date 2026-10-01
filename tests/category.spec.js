@@ -1,5 +1,6 @@
 import { test, expect } from "../fixtures/base.js";
 import { dismissConsent } from "../utils/dismissConsent.js";
+import { blockAds } from "../utils/blockAds.js";
 
 const categories = [
   { parent: "Women", child: "Dress", heading: "WOMEN - DRESS PRODUCTS" },
@@ -7,14 +8,8 @@ const categories = [
 ];
 
 for (const item of categories) {
-  test(`Filter by ${item.parent} - ${item.child}`, async ({
-    page,
-    browserName,
-  }) => {
-    test.skip(
-      browserName === "webkit",
-      "Accordion animation unreliable on webkit",
-    );
+  test(`Filter by ${item.parent} - ${item.child}`, async ({ page }) => {
+    await blockAds(page);
     await page.goto("/products");
     await dismissConsent(page);
     await page.locator(`[href="#${item.parent}"]`).click();
