@@ -4,7 +4,7 @@
 
 A Playwright test automation framework for [automationexercise.com](https://automationexercise.com), a live e-commerce site. Built to demonstrate a maintainable, real-world QA automation approach: Page Object Model, fixtures, reusable utilities, data-driven tests, and CI running across three browsers.
 
-## What this demonstrates
+## What this demonstrates - See [TEST_STRATEGY.md](TEST_STRATEGY.md) for the thinking behind coverage, risk, and architecture decisions.
 
 - **A structured framework, not just scripts.** Separation of concerns across tests, page objects, fixtures, and utilities, so the suite stays readable and maintainable as it grows.
 - **Handling a genuinely hostile real-world site.** The target site serves third-party Google ads and a GDPR consent popup that intermittently cover elements, inject fake links, and behave differently across browsers and between local and CI runs. The framework handles all of this (see "Handling flakiness" below).
