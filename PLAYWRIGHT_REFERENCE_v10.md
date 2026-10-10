@@ -1,4 +1,4 @@
-# Playwright Reference Guide (v9)
+# Playwright Reference Guide (v10)
 
 A plain-English reference for everything you learn as you go.
 
@@ -19,6 +19,9 @@ A plain-English reference for everything you learn as you go.
 **Finding elements**
 - [The seven built-in locators](#the-seven-built-in-locators)
 - [Locator priority order — which to pick when inspecting](#locator-priority-order--which-to-pick-when-inspecting)
+- [Telling semantic classes from presentational ones](#telling-semantic-classes-from-presentational-ones)
+- [Scoping a locator to a container](#scoping-a-locator-to-a-container)
+- [exact: true — tightening a name match](#exact-true--tightening-a-name-match)
 - [getByRole()](#getbyrole)
 - [getByText()](#getbytext)
 - [getByLabel()](#getbylabel)
@@ -57,6 +60,7 @@ A plain-English reference for everything you learn as you go.
 - [Page Object Model (POM)](#page-object-model-pom)
 - [Fixtures](#fixtures)
 - [Utility functions](#utility-functions)
+- [Handling flakiness](#handling-flakiness)
 - [API testing](#api-testing)
 - [Tags and smoke tests](#tags-and-smoke-tests)
 - [Comments — when to use them](#comments--when-to-use-them)
@@ -287,6 +291,28 @@ When you inspect an element, don't agonise over "which locator is right?" Walk d
 
 **Why decorative classes are a trap:** `fa-*` classes are Font Awesome *icon* classes — they describe what an icon looks like (an arrow, a trash can), not what the element does. If the site swaps the icon, the class changes and your locator breaks even though the element's function didn't. Same for layout classes like `col-sm-3`. Locate by what a thing *is*, not how it *looks*.
 
+#### Telling semantic classes from presentational ones
+
+When you're down at rung 5 with several classes to choose from, these three rules decide it:
+
+1. **Layout / utility classes → skip.** Anything starting `col-`, `row-`, `mt-`, `pt-`, `mb-`, `text-`, `d-`, `pull-`. These are Bootstrap or utility framework classes describing position and spacing.
+2. **Icon library classes → skip.** Anything starting `fa-`, `glyphicon-`. These describe an icon's appearance.
+3. **English-noun class names → prefer.** Names that read like a description of a thing: `view-product`, `product-information`, `cart-row`, `nav-menu`, `check_out`. These describe purpose and survive redesigns.
+
+**Worked example.** The product image on a details page sits inside two nested divs:
+
+```html
+<div class="col-sm-5">
+  <div class="view-product">
+    <img src="/get_product_picture/5" alt="ecommerce website products">
+  </div>
+</div>
+```
+
+Both would work as a scope today. `col-sm-5` breaks the moment someone changes the layout to a six-column grid. `view-product` doesn't. Pick the noun.
+
+The proper term for this is **choosing semantic locators over presentational ones**.
+
 ---
 
 ### `getByRole()`
@@ -420,6 +446,30 @@ This means "find an `<a>` element that also has the class `check_out`". It's mor
 
 ---
 
+## Scoping a locator to a container
+
+When a locator matches too many elements, narrowing the *search area* is usually better than picking by index.
+
+```javascript
+// Searches the whole page — may match ads, logos, icons
+page.getByRole("img")
+
+// Searches only inside the product image container
+page.locator(".view-product").getByRole("img")
+```
+
+Chain `page.locator(CONTAINER)` before the inner locator. Everything outside that container is excluded.
+
+**Why this beats `.first()`:** index-based picks break the moment the page order changes. A scope keeps working as long as the container exists. It is also the defence against third-party ads injecting elements that match your locator, since the injected elements sit outside your container.
+
+Used in the category test to avoid Google ads matching the sub-category links:
+
+```javascript
+await page.locator(`#${item.parent}`).getByRole("link", { name: item.child, exact: true }).click();
+```
+
+---
+
 ## Picking one element from many
 
 When a locator matches more than one element, Playwright's **strict mode** refuses to guess which one you meant, and the test fails with a "strict mode violation". You narrow it down:
@@ -440,6 +490,20 @@ Returns every matching element as an array, for looping. Needs `await`.
 ```javascript
 const checkboxes = await page.getByRole('checkbox').all();
 ```
+
+---
+
+## `exact: true` — tightening a name match
+
+`getByRole` matches names **partially and case-insensitively** by default. So `{ name: "Women" }` also matches "Women's Clothing" and "Women's Dresses".
+
+```javascript
+page.getByRole("link", { name: "Dress", exact: true })
+```
+
+`exact: true` requires the accessible name to match exactly. Useful when ads or other elements contain your target word as a substring.
+
+**Caution:** exact matching includes whitespace. If the real link text is `" Women "` with surrounding spaces, `exact: true` looking for `"Women"` finds nothing and times out. When that happens, locate by `href` or another attribute instead.
 
 ---
 
@@ -519,6 +583,63 @@ Things you check with `expect()`. Always need `()` at the end.
 | `toHaveValue('...')` | An input field has this value |
 | `toBe(value)` | A value equals exactly this — for numbers and strings, not page elements |
 | `isVisible()` | Returns true/false — used inside `if` statements, NOT inside `expect()` |
+
+---
+
+### `toHaveAttribute` — asserting on an HTML attribute
+
+Checks an element has a specific attribute with a specific value. Takes **two arguments**: the attribute name, then the value you expect.
+
+```javascript
+await expect(LOCATOR).toHaveAttribute("attributeName", "expectedValue");
+```
+
+For this image:
+
+```html
+<img src="/get_product_picture/5" alt="ecommerce website products">
+```
+
+```javascript
+await expect(page.locator(".view-product").getByRole("img"))
+  .toHaveAttribute("src", "/get_product_picture/5");
+```
+
+**Watch for circular assertions.** If you *locate* an element by an attribute and then *assert* that same attribute, the test can never meaningfully fail. Locating by `[src="/get_product_picture/5"]` and then asserting `src` equals that value proves nothing. The proper term is a **tautological assertion**. Scope by a container instead, then assert the attribute.
+
+---
+
+### `toHaveCount` — asserting how many elements match
+
+Checks a locator matches an exact number of elements. Useful as a checkpoint after an action that should change a count.
+
+```javascript
+await expect(page.locator("a.cart_quantity_delete")).toHaveCount(2);
+```
+
+This is what makes the cart-clearing loop safe (see Handling flakiness below): after each delete, wait for the count to drop before continuing.
+
+---
+
+### Building a regex from a variable
+
+Slashes only work when you type the text yourself:
+
+```javascript
+await expect(page).toHaveURL(/payment_done/);
+```
+
+When the text lives in a **variable**, use `new RegExp()` instead. You cannot put a variable between slashes.
+
+```javascript
+await expect(page.getByText(new RegExp(item.heading, "i"))).toBeVisible();
+```
+
+`new RegExp(text, "i")` builds a regex from whatever is in `text`, with the `"i"` flag for case-insensitive matching.
+
+Two doors to the same room: **slashes for text you type, `new RegExp` for text in a variable.**
+
+The `i` flag is the same one you would write after the closing slash in `/products/i`. It means ignore capital letters, which sidesteps the whole question of whether a heading is genuinely uppercase in the HTML or just styled that way with CSS.
 
 ---
 
@@ -631,6 +752,39 @@ test.beforeEach(async ({ page }) => {
 ### `test.only()` and `test.skip()`
 `test.only()` — runs only that one test. Useful when debugging. **Never push `test.only` to GitHub** — it skips all other tests in CI.
 `test.skip()` — skips that test, runs the rest. For a test failing on a known bug.
+
+---
+
+### Skipping conditionally on browser
+
+`test.skip` can take a condition. Inside a test body it takes the condition **directly**, not as a function, and you pull `browserName` from the test parameters:
+
+```javascript
+test("example", async ({ page, browserName }) => {
+  test.skip(browserName === "webkit", "Reason the test is skipped here");
+  // ...
+});
+```
+
+The reason string matters. It documents the decision as deliberate rather than lazy, and shows in the report.
+
+**The function form** (`test.skip(({ browserName }) => ...)`) only works inside a `describe` block. Using it in a test body throws `test.skip() with a function can only be called inside describe block`.
+
+**Revisit skips after fixing root causes.** A webkit skip added for an "accordion animation" turned out to be caused by ads all along. Once ads were blocked at the network level, webkit passed and the skip was removed. A skip is a workaround, so check whether it is still needed after any root-cause fix.
+
+---
+
+### `waitFor` — waiting for an element to reach a state
+
+```javascript
+await page.locator("#Women").waitFor({ state: "visible" });
+```
+
+Waits until that element is actually visible before continuing. Useful after triggering an animation (an accordion opening, a modal appearing) where the next action depends on the animation finishing.
+
+States available: `visible`, `hidden`, `attached`, `detached`.
+
+This is better than a fixed pause (`waitForTimeout`), which either wastes time or is too short. Wait for the *state you need*, not for a guessed number of milliseconds.
 
 ---
 
@@ -795,6 +949,101 @@ The parameter is named `page` inside the function, but that's just a label — y
 
 ---
 
+## Handling flakiness
+
+Flaky tests pass sometimes and fail other times with no code change. The instinct is to patch each failure where it appears. The better move is to find what the failures share and fix that.
+
+### Network-level blocking of third-party noise
+
+Ads, consent popups, analytics and trackers load from third-party domains. They cover buttons, inject fake links, and behave differently on each run and each browser. Blocking the requests stops them loading at all.
+
+`page.route()` intercepts network requests. `route.abort()` blocks them.
+
+```javascript
+// utils/blockAds.js
+export async function blockAds(page) {
+  await page.route("**/*googlesyndication.com/**", (route) => route.abort());
+  await page.route("**/*doubleclick.net/**", (route) => route.abort());
+  await page.route("**/*fundingchoicesmessages.google.com/**", (route) => route.abort());
+}
+```
+
+**Call it before `goto`**, so the rules are in place before the page makes any requests:
+
+```javascript
+await blockAds(page);
+await page.goto("/products");
+```
+
+**Reading the pattern:** `**/*domain.com/**` uses wildcards. `**` and `*` mean "anything can be here", so it matches any URL containing that domain regardless of subdomain or path.
+
+**Finding the domains to block:** the error output names them. `adsbygoogle`, `google-anno`, `goog-rentry` in a strict-mode violation or an "intercepts pointer events" message tell you ads are involved. `fc-consent-root` is Google's Funding Choices consent manager, served from `fundingchoicesmessages.google.com`.
+
+Real test suites block ads, analytics and trackers routinely. It is not a workaround for a bad practice site, it is standard practice for keeping suites fast and stable.
+
+### Count-based checkpoints for DOM races
+
+When a loop acts on elements that disappear as it works, the loop can outpace the site's re-render and try to click something already gone. The error says `element was detached from the DOM` or `element is not stable`.
+
+The fix is a checkpoint: after each action, wait for proof it completed before continuing.
+
+```javascript
+// utils/clearCart.js
+import { expect } from "@playwright/test";
+
+export async function clearCart(page) {
+  const deleteButtons = page.locator("a.cart_quantity_delete");
+  while (await deleteButtons.count() > 0) {
+    const countBefore = await deleteButtons.count();
+    await deleteButtons.first().click();
+    await expect(deleteButtons).toHaveCount(countBefore - 1);
+  }
+}
+```
+
+The `toHaveCount(countBefore - 1)` line is the checkpoint. The loop cannot run ahead because it waits for the count to actually drop.
+
+**Why `.first()` fresh each iteration:** re-querying each time avoids stale references. Grabbing all elements into a list upfront and looping over that list breaks, because the saved references point at elements that no longer exist after the first deletion. Re-query rather than cache when the page changes underneath you.
+
+### `waitForLoadState` vs waiting for state
+
+`page.waitForLoadState("domcontentloaded")` waits for a page *load*. If the site updates via JavaScript without reloading, no load event ever fires and the wait does nothing useful. Match the wait to what actually happens.
+
+### Known starting state
+
+A test that depends on state should set that state up itself rather than inheriting whatever the last run left behind.
+
+```javascript
+await page.goto("/view_cart");
+await clearCart(page);
+// now the cart is guaranteed empty before the real test begins
+```
+
+### Distinguishing site flakiness from a real bug
+
+Not every intermittent failure is yours to fix.
+
+| Signal | Likely cause |
+|--------|--------------|
+| Fails consistently, same way, every run | Real bug in the test or the app |
+| Passes on re-run with no code change | Environment or site flakiness |
+| Fails only in CI, never locally | Something present only in CI (ads, timing, headless differences) |
+| Fails only in one browser | Engine-specific behaviour |
+| Fails in *setup*, before tests run | Infrastructure, not your code |
+
+For genuine site flakiness that you cannot control, retries are the right tool, not more test code:
+
+```javascript
+// playwright.config.js
+retries: process.env.CI ? 2 : 0,
+```
+
+Retries on CI absorb site lag. No retries locally, so flakiness surfaces during development instead of hiding.
+
+**Knowing when to stop.** A test that is correct but flaky because of something outside your control is not worth unlimited hardening. A flaky test you keep fighting can be worse than no test, because people stop trusting the suite and start ignoring red. Fix the root cause where you can, absorb with retries where you cannot, and scope the test away where neither works.
+
+---
+
 ## API testing
 
 Testing an API (Application Programming Interface) directly without a browser. Faster than UI testing — goes straight to the data. Uses `request` instead of `page`.
@@ -948,9 +1197,49 @@ Error: locator.setInputFiles: Unexpected token "" while parsing css selector "[n
 The scary part is "Unexpected token while parsing css selector". The signal is the echoed selector: `[name="upload_file]` — missing its closing quote. Fix the quote, ignore the rest.
 
 **Other common signals:**
-- `strict mode violation ... resolved to N elements` → your locator matched more than one; add `.first()` or scope it.
+- `strict mode violation ... resolved to N elements` → your locator matched more than one; scope it or add `.first()`.
 - `Test timeout of 30000ms exceeded ... waiting for <locator>` → Playwright never found that element; wrong locator, or something (a popup) is blocking it.
-- `<div class="fc-consent-root"> ... intercepts pointer events` → the consent popup is covering the thing you're clicking; dismiss consent first.
+- `<div class="fc-consent-root"> ... intercepts pointer events` → the consent popup is covering the thing you're clicking.
+
+---
+
+### Reading the call log
+
+The red headline is the **symptom**, not the cause. `Test timeout of 30000ms exceeded` says only "I waited and gave up" — every timeout says the same thing. The cause is in the **call log** underneath.
+
+**The method: read the first line and the last meaningful line. The middle is retry noise.**
+
+```
+Error: locator.click: Test timeout of 30000ms exceeded.   ← symptom, skip it
+Call log:
+  - waiting for getByRole('button', { name: 'Submit' })   ← FIRST LINE: what it wanted
+  - locator resolved to <input ... value="Submit" .../>   ← it found the element
+  - attempting click action                                ← it tried
+  - 2 × waiting for element to be visible, enabled, stable ← noise
+    - scrolling into view if needed                        ← noise
+    - done scrolling                                       ← noise
+  - <div class="fc-consent-root">… intercepts pointer events  ← LAST LINE: the cause
+```
+
+Translated: it found the Submit button fine, but the consent popup was covering it, so every click hit the popup instead.
+
+**Three things the log tells you quickly:**
+
+- **`locator resolved to <element>`** is good news. It found the element, so your locator is correct. The problem is something *after* finding it.
+- **Many repeated retry blocks** are the signature of something *blocking* an action. A wrong locator fails differently, saying "not found" without the retry cycle.
+- **`intercepts pointer events`** means something is sitting on top of your target, catching the click. The class name in that line tells you what: `fc-consent-root` is the consent popup, `adsbygoogle` is an ad.
+
+### Failures that are not your code
+
+Some red CI runs have nothing to do with your tests. If the failure happens in a **setup step** before any test runs, it is infrastructure.
+
+```
+Failed to fetch https://dl.google.com/linux/chrome-stable/deb ... Hash Sum mismatch
+Failed to install browsers
+Error: Installation process exited with code: 100
+```
+
+That is the browser install step failing because a package server had a bad moment. No test ran. Re-run the job rather than debugging code that was never broken.
 
 ---
 

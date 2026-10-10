@@ -4,7 +4,7 @@
 
 A Playwright test automation framework for [automationexercise.com](https://automationexercise.com), a live e-commerce site. Built to demonstrate a maintainable, real-world QA automation approach: Page Object Model, fixtures, reusable utilities, data-driven tests, and CI running across three browsers.
 
-See [BUG_REPORT_EXAMPLE.md](BUG_REPORT_EXAMPLE.md) for a sample bug report in the format I would use in a real QA role.
+See [BUG_REPORTS.md](BUG_REPORTS.md) for a sample bug report in the format I would use in a real QA role.
 
 ## What this demonstrates - See [TEST_STRATEGY.md](TEST_STRATEGY.md) for the thinking behind coverage, risk, and architecture decisions.
 
