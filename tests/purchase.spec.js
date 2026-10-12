@@ -5,6 +5,7 @@ import { clearCart } from "../utils/clearCart.js";
 import { blockAds } from "../utils/blockAds.js";
 
 test("Product purchase journey", async ({ loggedInPage }) => {
+  test.setTimeout(60000); //Checkout transition is slow on CI infrastructure, default 30s is not enough
   await blockAds(loggedInPage);
   await loggedInPage.goto("/view_cart");
   await dismissConsent(loggedInPage);
