@@ -1,5 +1,4 @@
 import { test, expect } from "../fixtures/base.js";
-import { dismissConsent } from "../utils/dismissConsent.js";
 import { PaymentPage } from "../pages/PaymentPage.js";
 import { clearCart } from "../utils/clearCart.js";
 import { blockAds } from "../utils/blockAds.js";
@@ -8,11 +7,9 @@ test("Product purchase journey", async ({ loggedInPage }) => {
   test.setTimeout(60000); //Checkout transition is slow on CI infrastructure, default 30s is not enough
   await blockAds(loggedInPage);
   await loggedInPage.goto("/view_cart");
-  await dismissConsent(loggedInPage);
   await clearCart(loggedInPage);
   const paymentActions = new PaymentPage(loggedInPage);
   await loggedInPage.goto("/products");
-  await dismissConsent(loggedInPage);
   await loggedInPage.locator('[data-product-id="1"]').first().click();
   await loggedInPage.getByRole("link", { name: "View Cart" }).click();
   await loggedInPage.locator("a.check_out").click();

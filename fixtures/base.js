@@ -1,14 +1,14 @@
 import { test as base } from "@playwright/test";
 import { LoginPage } from "../pages/LoginPage.js";
-import { dismissConsent } from "../utils/dismissConsent.js";
+import { blockAds } from "../utils/blockAds.js";
 
 //A fixture answers "what state does a test need to start in?"
 //Fixture = what state a test starts in (loggedInPage delivers an already-logged-in tab)
 
 export const test = base.extend({
   loggedInPage: async ({ page }, use) => {
+    await blockAds(page);
     await page.goto("/login");
-    await dismissConsent(page);
 
     const loginActions = new LoginPage(page);
     await loginActions.login("PWtest@PW.com", "PW123");

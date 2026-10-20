@@ -1,9 +1,9 @@
 import { test, expect } from "../fixtures/base.js";
-import { dismissConsent } from "../utils/dismissConsent.js";
+import { blockAds } from "../utils/blockAds.js";
 
 test("Product search", async ({ page }) => {
+  await blockAds(page);
   await page.goto("/products");
-  await dismissConsent(page);
   await page.locator("#search_product").fill("Tshirt");
   await page.locator("#submit_search").click();
   await expect(
