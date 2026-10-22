@@ -3,7 +3,7 @@ import { blockAds } from "../utils/blockAds.js";
 
 test("Successful newsletter subscription", async ({ page }) => {
   await blockAds(page);
-  await page.goto("https://automationexercise.com/");
+  await page.goto("/");
   const email = `test${Date.now()}@dummy.com`;
   await page.locator('[id="susbscribe_email"]').fill(email);
   await page.locator('[id="subscribe"]').click();
