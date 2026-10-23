@@ -1,8 +1,8 @@
 import { test, expect } from "../fixtures/base.js";
-import { blockAds } from "../utils/blockAds.js";
+import { blockThirdParty } from "../utils/blockThirdParty.js";
 
 test("Product detail page", async ({ page }) => {
-  await blockAds(page);
+  await blockThirdParty(page);
   await page.goto("/products");
   await page.locator('[href="/product_details/5"]').click();
   await expect(page.getByText("Winter Top")).toBeVisible();

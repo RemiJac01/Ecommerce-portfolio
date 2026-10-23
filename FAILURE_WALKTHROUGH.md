@@ -44,10 +44,13 @@ That explained the two things which had made the failure confusing:
 **Attempt one: scope the locator to the accordion panel.**
 
 ```javascript
-await page.locator(`#${item.parent}`).getByRole("link", { name: item.child }).click();
+await page
+  .locator(`#${item.parent}`)
+  .getByRole("link", { name: item.child })
+  .click();
 ```
 
-This fixed the sub-category click, since the injected ads sat outside that container. The next CI run then failed on the *parent* click instead, where an ad labelled "Women's Clothing" matched a locator looking for "Women".
+This fixed the sub-category click, since the injected ads sat outside that container. The next CI run then failed on the _parent_ click instead, where an ad labelled "Women's Clothing" matched a locator looking for "Women".
 
 **Attempt two: exact name matching.**
 
@@ -66,18 +69,20 @@ The root cause was not the locators. It was that third-party ad scripts were loa
 Fixed by intercepting those requests at the network level and aborting them, so the ads never reach the page:
 
 ```javascript
-// utils/blockAds.js
-export async function blockAds(page) {
+// utils/blockThirdParty.js
+export async function blockThirdParty(page) {
   await page.route("**/*googlesyndication.com/**", (route) => route.abort());
   await page.route("**/*doubleclick.net/**", (route) => route.abort());
-  await page.route("**/*fundingchoicesmessages.google.com/**", (route) => route.abort());
+  await page.route("**/*fundingchoicesmessages.google.com/**", (route) =>
+    route.abort(),
+  );
 }
 ```
 
 Called before navigation, so the rules are in place before the page makes any requests:
 
 ```javascript
-await blockAds(page);
+await blockThirdParty(page);
 await page.goto("/products");
 ```
 
@@ -89,7 +94,7 @@ The category test passed. So did several failures elsewhere that had been treate
 
 A WebKit skip added earlier to the category test, under the assumption that an accordion animation was at fault, was removed. The engine had never been the problem.
 
-The fix was verified a second time by deliberately reintroducing the failure. Commenting out the `blockAds` call reproduces failures on the same tests, confirming the utility is what is holding them green rather than coincidence.
+The fix was verified a second time by deliberately reintroducing the failure. Commenting out the `blockThirdParty` call reproduces failures on the same tests, confirming the utility is what is holding them green rather than coincidence.
 
 ## What it taught me
 

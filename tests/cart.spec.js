@@ -1,9 +1,9 @@
 import { test, expect } from "../fixtures/base.js";
 import { clearCart } from "../utils/clearCart.js";
-import { blockAds } from "../utils/blockAds.js";
+import { blockThirdParty } from "../utils/blockThirdParty.js";
 
 test("cart quantity and price test", async ({ page }) => {
-  await blockAds(page);
+  await blockThirdParty(page);
   await page.goto("/products");
   await clearCart(page);
   await page.locator('[data-product-id="1"]').first().click();

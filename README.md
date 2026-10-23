@@ -21,7 +21,7 @@ A Playwright test automation framework for [automationexercise.com](https://auto
 
 The target site is deliberately awkward to automate, which made it a good test of real QA problem-solving:
 
-- **Network-level blocking of third-party noise.** Google ads and the consent popup were causing intermittent failures across multiple tests, differently on each run. Rather than patching each test individually, the framework blocks these requests at the network level (`utils/blockAds.js`) so they never load. One root-cause fix removed flakiness across the whole suite and resolved WebKit failures that symptom-level workarounds could not. Full write-up in [FAILURE_WALKTHROUGH.md](FAILURE_WALKTHROUGH.md).
+- **Network-level blocking of third-party noise.** Google ads and the consent popup were causing intermittent failures across multiple tests, differently on each run. Rather than patching each test individually, the framework blocks these requests at the network level (`utils/blockThirdParty.js`) so they never load. One root-cause fix removed flakiness across the whole suite and resolved WebKit failures that symptom-level workarounds could not. Full write-up in [FAILURE_WALKTHROUGH.md](FAILURE_WALKTHROUGH.md).
 - **Race-condition handling in cart clearing.** The cart-clearing utility (`utils/clearCart.js`) re-queries the DOM on each iteration and waits for the item count to drop before continuing, avoiding a race where the loop outpaced the site's re-render.
 - **Resilient locators and assertions.** Locators target stable attributes (`data-qa`, `href`) over fragile ones. URL assertions use regex to tolerate dynamic values such as order IDs.
 - **Known starting state.** Tests that depend on cart state clear it first, so a previous run cannot contaminate the next.
@@ -31,7 +31,7 @@ The target site is deliberately awkward to automate, which made it a good test o
 - `tests/` — spec files, one per feature
 - `pages/` — Page Object Models (`LoginPage`, `PaymentPage`)
 - `fixtures/` — custom fixtures (`loggedInPage` for reusable authenticated state)
-- `utils/` — reusable helpers (`blockAds`, `clearCart`)
+- `utils/` — reusable helpers (`blockThirdParty`, `clearCart`)
 - `test_fixtures/` — static test data (file upload)
 - `playwright.config.js` — base URL, cross-browser projects, CI retry config
 

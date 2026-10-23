@@ -1,8 +1,8 @@
 import { test, expect } from "../fixtures/base.js";
-import { blockAds } from "../utils/blockAds.js";
+import { blockThirdParty } from "../utils/blockThirdParty.js";
 
 test("Successful newsletter subscription", async ({ page }) => {
-  await blockAds(page);
+  await blockThirdParty(page);
   await page.goto("/");
   const email = `test${Date.now()}@dummy.com`;
   await page.locator('[id="susbscribe_email"]').fill(email);

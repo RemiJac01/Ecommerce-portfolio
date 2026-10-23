@@ -31,7 +31,7 @@ The suite is built on a small number of guiding principles:
 - **Playwright.** Chosen for cross-browser support out of the box, built-in auto-waiting that reduces flaky code, strong first-class locators, and modern debugging tools (trace viewer, UI mode, codegen).
 - **Page Object Model.** Used selectively where locators and actions are reused across tests (`LoginPage`, `PaymentPage`). Not applied to every page, in line with YAGNI.
 - **Fixtures.** `loggedInPage` provides reusable authenticated state for tests that need it, without forcing every test in the file to pay the setup cost (as a `beforeEach` would).
-- **Utilities.** Cross-cutting helpers extracted when a pattern is used more than once (`blockAds`, `clearCart`, `dismissConsent`).
+- **Utilities.** Cross-cutting helpers extracted when a pattern is used more than once (`blockThirdParty`, `clearCart`, `dismissConsent`).
 - **GitHub Actions CI.** The full suite runs on every push, with retries configured for CI only. Local runs do not retry, so flakiness is surfaced during development rather than hidden.
 
 ## Risk and mitigation

@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
-import { blockAds } from "../utils/blockAds";
+import { blockThirdParty } from "../utils/blockThirdParty";
 
 test("Successful registration", async ({ page }) => {
-  await blockAds(page);
+  await blockThirdParty(page);
   await page.goto("/login");
   await page.getByPlaceholder("Name").fill("nametest");
   const email = `test${Date.now()}@test.com`; // Date.now() generates a unique timestamp so every test run uses a different email, preventing duplicate registration failures

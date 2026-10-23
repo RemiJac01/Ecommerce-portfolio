@@ -1,6 +1,6 @@
 import { test, expect } from "../fixtures/base.js";
 import { LoginPage } from "../pages/LoginPage.js";
-import { blockAds } from "../utils/blockAds.js";
+import { blockThirdParty } from "../utils/blockThirdParty.js";
 
 const invalidLogins = [
   {
@@ -19,7 +19,7 @@ for (const arrayData of invalidLogins) {
   test(`Incorrect UN & PW tests for ${arrayData.username}`, async ({
     page,
   }) => {
-    await blockAds(page);
+    await blockThirdParty(page);
     await page.goto("/login");
     const loginActions = new LoginPage(page);
     await loginActions.login(arrayData.username, arrayData.password);
@@ -28,7 +28,7 @@ for (const arrayData of invalidLogins) {
 }
 
 test("Login", async ({ page }) => {
-  await blockAds(page);
+  await blockThirdParty(page);
   await page.goto("https://automationexercise.com/login");
   const loginActions = new LoginPage(page);
   await loginActions.login("PWtest@PW.com", "PW123");

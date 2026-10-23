@@ -1,8 +1,8 @@
 import { test, expect } from "../fixtures/base.js";
-import { blockAds } from "../utils/blockAds.js";
+import { blockThirdParty } from "../utils/blockThirdParty.js";
 
 test("Contact us page", async ({ page }) => {
-  await blockAds(page);
+  await blockThirdParty(page);
   await page.goto("/contact_us");
   await page.locator('[data-qa="name"]').fill("This is a test");
   await page.locator('[data-qa="email"]').fill("test@test.com");
@@ -21,7 +21,7 @@ test("Contact us page", async ({ page }) => {
 });
 
 test("Empty email field", async ({ page }) => {
-  await blockAds(page);
+  await blockThirdParty(page);
   await page.goto("/contact_us");
   await page.locator('[data-qa="name"]').fill("Neg test 1");
   await page.locator('[data-qa="subject"]').fill("negative email test");

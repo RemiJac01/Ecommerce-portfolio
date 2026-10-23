@@ -1,5 +1,5 @@
 import { test, expect } from "../fixtures/base.js";
-import { blockAds } from "../utils/blockAds.js";
+import { blockThirdParty } from "../utils/blockThirdParty.js";
 
 const categories = [
   { parent: "Women", child: "Dress", heading: "WOMEN - DRESS PRODUCTS" },
@@ -8,7 +8,7 @@ const categories = [
 
 for (const item of categories) {
   test(`Filter by ${item.parent} - ${item.child}`, async ({ page }) => {
-    //await blockAds(page);
+    await blockThirdParty(page);
     await page.goto("/products");
     await page.locator(`[href="#${item.parent}"]`).click();
     await page.locator(`#${item.parent}`).waitFor({ state: "visible" });
