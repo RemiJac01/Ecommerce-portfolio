@@ -8,7 +8,7 @@ const categories = [
 
 for (const item of categories) {
   test(`Filter by ${item.parent} - ${item.child}`, async ({ page }) => {
-    await blockAds(page);
+    //await blockAds(page);
     await page.goto("/products");
     await page.locator(`[href="#${item.parent}"]`).click();
     await page.locator(`#${item.parent}`).waitFor({ state: "visible" });
