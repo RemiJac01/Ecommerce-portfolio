@@ -1,6 +1,7 @@
 import { test, expect } from "../fixtures/base.js";
 import { LoginPage } from "../pages/LoginPage.js";
 import { blockThirdParty } from "../utils/blockThirdParty.js";
+import { testUser } from "../test_data/data.js";
 
 const invalidLogins = [
   {
@@ -29,9 +30,9 @@ for (const arrayData of invalidLogins) {
 
 test("Login", async ({ page }) => {
   await blockThirdParty(page);
-  await page.goto("https://automationexercise.com/login");
+  await page.goto("/login");
   const loginActions = new LoginPage(page);
-  await loginActions.login("PWtest@PW.com", "PW123");
+  await loginActions.login(testUser.email, testUser.password);
   await expect(page).toHaveURL("https://automationexercise.com/");
   await expect(
     page
