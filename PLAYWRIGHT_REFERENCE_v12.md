@@ -1,4 +1,4 @@
-# Playwright Reference Guide (v11)
+# Playwright Reference Guide (v12)
 
 A plain-English reference for everything you learn as you go.
 
@@ -882,14 +882,15 @@ Reusable setup code any test can request by name — just like `page`. Unlike `b
 ```javascript
 import { test as base } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage.js';
-import { dismissConsent } from '../utils/dismissConsent.js';
+import { blockThirdParty } from '../utils/blockThirdParty.js';
+import { testUser } from '../test_data/data.js';
 
 export const test = base.extend({
   loggedInPage: async ({ page }, use) => {
-    await page.goto('https://automationexercise.com/login');
-    await dismissConsent(page);
+    await blockThirdParty(page);
+    await page.goto('/login');
     const loginActions = new LoginPage(page);
-    await loginActions.login('PWtest@PW.com', 'PW123');
+    await loginActions.login(testUser.email, testUser.password);
     // Required Playwright syntax — the fixture pauses here and lets the test run.
     await use(page);
   },
@@ -903,7 +904,7 @@ export { expect } from '@playwright/test';
 import { test, expect } from '../fixtures/base.js';
 
 test('purchase journey', async ({ loggedInPage }) => {
-  await loggedInPage.goto('https://automationexercise.com/products');
+  await loggedInPage.goto('/products');
   // ... already logged in ...
 });
 ```
@@ -912,7 +913,7 @@ test('purchase journey', async ({ loggedInPage }) => {
 
 **Difference from `beforeEach`:** a fixture only runs for tests that name it; `beforeEach` runs for every test in the file regardless.
 
-**Naming note:** the tab arrives in the test under whatever name the fixture exposes (`loggedInPage`). It's still the same `page` object — just renamed. When calling a utility inside such a test, pass the name you actually have: `dismissConsent(loggedInPage)`.
+**Naming note:** the tab arrives in the test under whatever name the fixture exposes (`loggedInPage`). It's still the same `page` object — just renamed. When calling a utility inside such a test, pass the name you actually have: `blockThirdParty(loggedInPage)`.
 
 ---
 
@@ -920,7 +921,9 @@ test('purchase journey', async ({ loggedInPage }) => {
 
 A **utility** is a reusable helper function that doesn't belong to any one page or test. When the same few lines appear in several places and aren't specific to a single page (so a POM doesn't fit), extract them into a `utils/` file.
 
-**File: `utils/dismissConsent.js`**
+> **Note:** `dismissConsent` is used below purely as a simple teaching example because its shape is easy to read. It is **no longer part of the suite** — consent is now blocked at the network level by `blockThirdParty` (see [Handling flakiness](#handling-flakiness)), which removed the need to dismiss the popup per page. The current utilities are `blockThirdParty` and `clearCart`.
+
+**File: `utils/dismissConsent.js`** *(illustrative only — not in the current suite)*
 ```javascript
 export async function dismissConsent(page) {
   const consentButton = page.getByRole('button', { name: 'Consent' });
