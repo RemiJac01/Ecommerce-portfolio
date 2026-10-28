@@ -16,6 +16,7 @@ The suite is built on a small number of guiding principles:
 - **One behaviour per test.** Each test verifies one thing clearly, so a failure points at a single cause and the suite stays diagnosable.
 - **Known starting state.** Tests that depend on state (such as a cart being empty) set up that state themselves rather than inheriting it from previous runs. This removes a whole class of cross-test contamination.
 - **Root-cause over symptom.** When the same problem shows up across multiple tests, it is fixed at the source rather than patched locally. The clearest example is network-level blocking of ads and the consent popup, which removed flakiness across the whole suite from a single utility.
+- **Centralised test data.** Shared or derived values (credentials, product IDs, a test card) live in one `test_data` module rather than being hardcoded across specs. Values local to a single test stay with that test.
 - **YAGNI.** Structure is added when it earns its place. Page objects, fixtures, and utilities exist because they are used more than once, not because the framework "should" have them.
 
 ## Test types used
@@ -31,7 +32,8 @@ The suite is built on a small number of guiding principles:
 - **Playwright.** Chosen for cross-browser support out of the box, built-in auto-waiting that reduces flaky code, strong first-class locators, and modern debugging tools (trace viewer, UI mode, codegen).
 - **Page Object Model.** Used selectively where locators and actions are reused across tests (`LoginPage`, `PaymentPage`). Not applied to every page, in line with YAGNI.
 - **Fixtures.** `loggedInPage` provides reusable authenticated state for tests that need it, without forcing every test in the file to pay the setup cost (as a `beforeEach` would).
-- **Utilities.** Cross-cutting helpers extracted when a pattern is used more than once (`blockThirdParty`, `clearCart`, `dismissConsent`).
+- **Utilities.** Cross-cutting helpers extracted when a pattern is used more than once (`blockThirdParty`, `clearCart`).
+- **Centralised test data.** A `test_data` module holds shared and derived values so a change to a credential or product ID updates every test that uses it.
 - **GitHub Actions CI.** The full suite runs on every push, with retries configured for CI only. Local runs do not retry, so flakiness is surfaced during development rather than hidden.
 
 ## Risk and mitigation
@@ -61,7 +63,6 @@ Several areas are deliberately not covered by this framework, with reasons:
 This is a portfolio project, not a production-ready test suite. In a real product I would additionally:
 
 - Build an API test layer first, so the suite follows the test pyramid rather than being entirely UI-driven.
-- Centralise test data (credentials, product IDs, expected prices) rather than hardcoding in each spec.
 - Introduce environment-specific configuration for dev, staging, and prod.
 - Add visual regression and accessibility coverage.
 - Integrate with the team's issue tracker so test failures link to tickets automatically.
