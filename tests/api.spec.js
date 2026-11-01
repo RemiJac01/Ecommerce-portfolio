@@ -16,3 +16,15 @@ test("reject with 405 test", async ({ request }) => {
   expect(body.responseCode).toBe(405);
   expect(body.message).toBe("This request method is not supported.");
 });
+
+test("searching for a product", async ({ request }) => {
+  const response = await request.post("/api/searchProduct", {
+    form: {
+      search_product: "top",
+    },
+  });
+  const body = await response.json();
+  expect(body.responseCode).toBe(200);
+  expect(body.products[0].id).toBe(1);
+  expect(body.products[0].name).toBe("Blue Top");
+});
