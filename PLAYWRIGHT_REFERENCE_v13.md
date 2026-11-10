@@ -1,4 +1,4 @@
-# Playwright Reference Guide (v12)
+# Playwright Reference Guide (v13)
 
 A plain-English reference for everything you learn as you go.
 
@@ -63,6 +63,8 @@ A plain-English reference for everything you learn as you go.
 - [Centralised test data](#centralised-test-data)
 - [Handling flakiness](#handling-flakiness)
 - [API testing](#api-testing)
+- [Investigating an API response](#investigating-an-api-response)
+- [data vs form in POST requests](#data-vs-form-in-post-requests)
 - [Tags and smoke tests](#tags-and-smoke-tests)
 - [Comments — when to use them](#comments--when-to-use-them)
 - [YAGNI](#yagni)
@@ -1114,6 +1116,114 @@ test('GET post returns 200 status', async ({ request }) => {
 **HTTP request types:** `GET` retrieves, `POST` sends new data, `PUT` updates, `DELETE` removes.
 **Common status codes:** `200` OK, `404` Not Found, `500` Server Error.
 **Notes:** never use `--headed` for API tests (no browser). `response.json()` turns the raw response into an object you read with `body.fieldname`.
+
+---
+
+## Investigating an API response
+
+When you hit an unfamiliar API, you don't know what the response body looks like until you see it. The investigation technique is the same every time:
+
+1. Parse the body: `const body = await response.json();`
+2. Log it: `console.log(body);`
+3. Run the test, read the terminal output
+4. See the field names and structure, then write assertions against what's actually there
+
+```javascript
+const body = await response.json();
+console.log(body);
+// prints: { responseCode: 200, products: [ { id: 1, name: 'Blue Top', ... }, ... ] }
+```
+
+**Remove `console.log` before committing.** It's a debugging tool, not part of the finished test. Leaving it in clutters the terminal output on every run and reads as "forgot to clean up" to a reviewer.
+
+### Reading the logged structure
+
+JSON objects are `{ key: value, key: value }`. The keys are the **field names**. You access them with `body.fieldname`.
+
+The visual tell for what kind of value a field holds:
+
+- **Square brackets `[ ]`** = an array (a list). You need `[index]` to pick an item, starting at 0. Then dot notation to reach a field inside that item: `body.products[0].name`.
+- **No brackets, just a value** = a plain number or string. Read it directly: `body.responseCode`, `body.message`.
+- **`[Object]`** in logged output = a nested object. The log truncated it. If you need to see inside, log that specific field: `console.log(body.products[0].category)`.
+
+### `undefined` in an assertion
+
+When an assertion receives `undefined`, it means the field you asked for does not exist on the object. Most common cause: a typo in the field name. `body.responseCodes` (extra "s") returns `undefined` because the field is called `responseCode`. Check the spelling against what you logged.
+
+### HTTP status vs application response code
+
+These are two different layers, and they can disagree.
+
+- `response.status()` is the **HTTP status code**, set by the web server. It says "I received your request and sent a response back." This is the transport layer.
+- `body.responseCode` (or whatever the API calls it) is the **application's own status**, inside the payload. It says "the feature itself worked or didn't."
+
+An API can return HTTP 200 (transport succeeded) but `responseCode: 405` in the body (feature rejected the request). If you only check `response.status()`, your test passes while the feature is broken.
+
+Assert on both:
+
+```javascript
+expect(response.status()).toBe(200);        // transport layer
+expect(body.responseCode).toBe(200);        // application layer
+```
+
+### Number-comparison matchers
+
+Beyond `toBe(value)` for exact equality, Playwright provides matchers for ranges:
+
+| Matcher | Checks |
+|---------|--------|
+| `toBe(value)` | exactly equals |
+| `toBeGreaterThan(n)` | strictly greater than n |
+| `toBeLessThan(n)` | strictly less than n |
+| `toBeGreaterThanOrEqual(n)` | n or above |
+| `toBeLessThanOrEqual(n)` | n or below |
+
+Useful for checking an array isn't empty:
+
+```javascript
+expect(body.products.length).toBeGreaterThan(0);
+```
+
+---
+
+## `data` vs `form` in POST requests
+
+When sending data with `request.post()`, Playwright offers two formats:
+
+```javascript
+// Sends JSON (Content-Type: application/json)
+const response = await request.post("/api/endpoint", {
+  data: {
+    search_product: "top",
+  },
+});
+
+// Sends form-encoded data (Content-Type: application/x-www-form-urlencoded)
+const response = await request.post("/api/endpoint", {
+  form: {
+    search_product: "top",
+  },
+});
+```
+
+The only difference is the keyword: `data` vs `form`. The object inside is identical. But the API cares which format arrives.
+
+**Which to use:** depends on what the API expects.
+
+- Modern APIs usually expect JSON (`data`)
+- Older APIs and simple web forms usually expect form-encoded (`form`)
+- The API docs sometimes specify it (look for "Content-Type" or "form-data")
+
+**The diagnostic when you get it wrong:** the API says the parameter is missing, even though you definitely sent it. You sent the right information in the wrong packaging. Switch `data` to `form` (or vice versa) and try again.
+
+```javascript
+// This site's search endpoint expects form data
+const response = await request.post("/api/searchProduct", {
+  form: {
+    search_product: "top",
+  },
+});
+```
 
 ---
 
