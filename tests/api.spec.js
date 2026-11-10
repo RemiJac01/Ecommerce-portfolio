@@ -42,3 +42,10 @@ test("PUT update account returns success", async ({ request }) => {
   expect(body.responseCode).toBe(200);
   expect(body.message).toBe("User updated!");
 });
+
+test("Delete to verify Login", async ({ request }) => {
+  const response = await request.delete("/api/verifyLogin");
+  const body = await response.json();
+  expect(body.responseCode).toBe(405);
+  expect(body.message).toBe("This request method is not supported.");
+});
