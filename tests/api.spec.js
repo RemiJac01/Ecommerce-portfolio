@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { testUser } from "../test_data/data";
 
 test("GET products list returns valid product data", async ({ request }) => {
   const response = await request.get("/api/productsList");
@@ -27,4 +28,17 @@ test("searching for a product", async ({ request }) => {
   expect(body.responseCode).toBe(200);
   expect(body.products[0].id).toBe(1);
   expect(body.products[0].name).toBe("Blue Top");
+});
+
+test("PUT update account returns success", async ({ request }) => {
+  const response = await request.put("/api/updateAccount", {
+    form: {
+      email: testUser.email,
+      password: testUser.password,
+      name: testUser.name,
+    },
+  });
+  const body = await response.json();
+  expect(body.responseCode).toBe(200);
+  expect(body.message).toBe("User updated!");
 });
